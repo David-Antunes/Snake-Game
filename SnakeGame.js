@@ -13,9 +13,16 @@ class Snake
 		this.y = y;
 		this.dx = -SIZE;
 		this.dy = 0;
+		this.draw();
+		this.tail = [];
 	}
 
 	draw()
+	{
+
+	}
+
+	drawTail()
 	{
 
 	}
@@ -27,10 +34,32 @@ class Snake
 
     move([dx,dy])
     {
-        
+		if(noInput(dx,dy))
+		{
+			MoveSnake();
+		} else
+		{
+			if(!oppositeMove(dx,dy))
+				updateDirection(dx,dy);
+			MoveSnake();
+		}
+		if(outOfBounds())
+			engine.gameLost();
+		else
+		{
+			this.draw();
+		}
+		
+	}
+
+	grow()
+	{
+		
 	}
 	
 }
+
+
 
 class Food
 {
@@ -45,10 +74,16 @@ class Food
 	{
 		if(this.x == x && this.y == y)
 		{
-			undraw();
-			engine.getNewFood();
-			engine.foodCounter++;
+			return true;
 		}
+		return false;
+
+	}
+	eatFood()
+	{
+		undraw();
+		engine.getNewFood();
+		engine.foodCounter++;
 	}
 
 	draw()
