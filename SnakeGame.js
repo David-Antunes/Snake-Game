@@ -11,56 +11,209 @@ class Snake
 	{
 		this.x = x;
 		this.y = y;
-		this.dx = -SIZE;
+		this.dx = SIZE;
 		this.dy = 0;
 		this.draw();
 		this.tail = [];
 	}
 
-	draw()
+	drawSnake()
 	{
-
+		this.draw();
+		this.drawTail();
 	}
 
-	drawTail()
+	draw()
 	{
+		// Set the fill style to blue
+		ctx.fillStyle = "#ffc0cb";
 
+		ctx.fillRect(this.x, this.y, SIZE, SIZE);
+	}
+
+	moveTail(x,y)
+	{
+		if(this.tail.length == 0)
+			return;
+		if(this.tail.length == 1)
+		{
+			this.tail[0].undraw();
+			this.tail[0].move(x,y);
+			this.tail[0].draw();
+			return;
+		}
+
+		let newX = this.tail[0].x;
+		let newY = this.tail[0].y;
+		let prevX;
+		let prevY;
+		this.tail[0].move(x,y);
+		for(let i = 1; i < this.tail.length; i++)
+		{
+			prevX = this.tail[i].x;
+			prevY = this.tail[i].y;
+			this.tail[i].move(newX, newY)
+			newX = prevX;
+			newY = prevY;
+			
+		}
+		
 	}
 
 	undraw()
 	{
-
+		ctx.clearRect(this.x-1,this.y -1, SIZE + 2, SIZE + 2);
 	}
 
     move([dx,dy])
     {
-		if(noInput(dx,dy))
+
+		if(!this.oppositeMove(dx,dy))
+			this.updateDirection(dx,dy);
+
+			if(this.outOfBounds())
+				engine.gameLost();
+
+		if(this.isThereFood(dx,dy))
 		{
-			MoveSnake();
-		} else
-		{
-			if(!oppositeMove(dx,dy))
-				updateDirection(dx,dy);
-			MoveSnake();
+			this.eatFood(dx,dy);
+			return;
 		}
-		if(outOfBounds())
+
+		if(this.isThereMyTail(dx,dy))
+		{
 			engine.gameLost();
-		else
-		{
-			this.draw();
+			return;
 		}
-		
+
+		this.moveSnake();
 	}
 
-	grow()
+	isThereFood(dx,dy)
 	{
+		let nextX = this.x + dx;
+		let nextY = this.y + dy;
+
+		if(engine.food.isOverlapping(nextX,nextY))
+			return true;
 		
+		return false;
+
+	}
+
+	isThereMyTail(dx,dy)
+	{
+		if(this.tail.length <= 1)
+			return false;
+
+
+		for(let i = 1; i < this.tail.length; i++)
+		{
+			if(this.tail[i].equals(this.x + dx, this.y + this. dy))
+				return true;
+		}
+		return false;
+
+	}
+
+
+	eatFood()
+	{
+			this.headToTail(engine.food);
+			engine.food.eatFood();
+	}
+
+	moveSnake()
+	{
+		let prevX = this.x;
+		let prevY = this.y;
+		if(this.tail.length == 0)
+		this.undraw();
+		this.x += this.dx;
+		this.y += this.dy;
+		this.draw();
+
+		this.moveTail(prevX,prevY);
+	}
+
+	oppositeMove(dx,dy)
+	{
+		if((dx + this.dx) == 0 && dx != this.dx)
+			return true;
+			if((dy + this.dy) == 0 && dy != this.dy)
+			return true;
+		
+		return false;
+	}
+
+	outOfBounds()
+	{
+		if(this.x < 0 || this.x >= WIDTH * SIZE)
+			return true;
+		else if(this.y < 0 || this.y >= HEIGHT * SIZE)
+			return true;
+
+		return false;
+	}
+
+	headToTail(food)
+	{
+		let newTail = new Tail(this.x, this.y);
+		newTail.draw();
+		this.tail.push(new Tail(this.x, this.y));
+		this.x = food.x;
+		this.y = food.y;
+		this.draw();
+	}
+
+	updateDirection(dx,dy)
+	{
+		if(dx == 0 && dy == 0)
+			return;
+		this.dx = dx;
+		this.dy = dy;
 	}
 	
 }
 
 
+class Tail
+{
+	constructor(x,y)
+	{
+		this.x = x;
+		this.y = y;
+	}
 
+	move(x,y)
+	{
+		this.x = x;
+		this.y = y;
+	}
+
+	draw()
+	{
+		// Set the fill style to blue
+		ctx.fillStyle = "#ffc0cb";
+
+		ctx.fillRect(this.x, this.y, SIZE, SIZE);
+	}
+
+	undraw()
+	{
+		ctx.clearRect(this.x,this.y, SIZE, SIZE);
+	}
+
+	equals(x,y)
+	{
+		if(x == this.x && this.y == y)
+			return true;
+		return false;
+	}
+}
+
+
+// Make it dodge
 class Food
 {
 	constructor(x,y)
@@ -70,7 +223,7 @@ class Food
 		this.draw();
 	}
 
-	isOverlapping([x,y])
+	isOverlapping(x,y)
 	{
 		if(this.x == x && this.y == y)
 		{
@@ -81,7 +234,6 @@ class Food
 	}
 	eatFood()
 	{
-		undraw();
 		engine.getNewFood();
 		engine.foodCounter++;
 	}
@@ -89,13 +241,8 @@ class Food
 	draw()
 	{
 		// Set the fill style to red
-		ctx.fillStyle = "#FF0000";
+		ctx.fillStyle = "#666666";
 
-		// And the Stroke to black
-		ctx.strokeStyle = "FF0000";
-
-		// Create rectangle
-		ctx.strokeRect(this.x, this.y, SIZE, SIZE);
 		ctx.fillRect(this.x, this.y, SIZE, SIZE);
 
 
@@ -114,7 +261,7 @@ class Engine
 		this.getCanvas();
 		this.setupEvents();
 		engine = this;
-		snake = new Snake();
+		snake = new Snake(10 * SIZE, 30 * SIZE);
 		this.foodCounter = 0;
 		this.food = this.newFood();
         
@@ -123,21 +270,22 @@ class Engine
     getKey() {
 		let k = this.key;
 		switch( k ) {
-			case 37:  	return [-1, 0]; //  LEFT, O, J
-			case 38:  	return [0, -1]; //    UP, Q, I
-			case 39:  	return [1, 0];  // RIGHT, P, L
-			case 40:  	return [0, 1];  //  DOWN, A, K
+			case 37:  	return [-SIZE, 0]; //  LEFT, O, J
+			case 38:  	return [0, -SIZE]; //    UP, Q, I
+			case 39:  	return [SIZE, 0];  // RIGHT, P, L
+			case 40:  	return [0, SIZE];  //  DOWN, A, K
 			default: 	return [0, 0];
 		};	
 	}
 	setupEvents() {
 		addEventListener("keydown", this.keyDownEvent, false);
 		addEventListener("keyup", this.keyUpEvent, false);
-		setInterval(this.animationEvent, 1000 / 15);
+		setInterval(this.animation, 1000 / 5);
 	}
 
 	keyDownEvent(k) {
-		this.key = k.keyCode;
+		engine.key = k.keyCode;
+
     }
     
 	keyUpEvent(k) {
@@ -145,7 +293,8 @@ class Engine
     
     animation()
     {
-		snake.move(this.getKey());
+		engine.collectedFood()
+		snake.move(engine.getKey());
 	}
 	
 	newFood()
@@ -168,14 +317,18 @@ class Engine
 	{
 		let c = document.getElementById("myCanvas");
 		ctx = c.getContext("2d");
-		ctx.fillStyle = "#666666";
-		ctx.fillRect(0, 0, WIDTH * SIZE, HEIGHT*SIZE);
+
 	}
 
 	collectedFood()
 	{
 		let c = document.getElementById("Food");
 		c.value = this.foodCounter;
+	}
+
+	gameLost()
+	{
+		snake = new Snake(10 * SIZE, 30 * SIZE);
 	}
     
 }
