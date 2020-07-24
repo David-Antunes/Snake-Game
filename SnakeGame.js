@@ -33,31 +33,29 @@ class Snake
 
 	moveTail(x,y)
 	{
+
+		
 		if(this.tail.length == 0)
 			return;
+		
+		let prevX = this.tail[0].x;
+		let prevY = this.tail[0].y;
 		if(this.tail.length == 1)
-		{
 			this.tail[0].undraw();
-			this.tail[0].move(x,y);
-			this.tail[0].draw();
-			return;
-		}
-
-		let newX = this.tail[0].x;
-		let newY = this.tail[0].y;
-		let prevX;
-		let prevY;
-		this.tail[0].move(x,y);
+		this.tail[0].x = x;
+		this.tail[0].y = y;
 		for(let i = 1; i < this.tail.length; i++)
 		{
-			prevX = this.tail[i].x;
-			prevY = this.tail[i].y;
-			this.tail[i].move(newX, newY)
-			newX = prevX;
-			newY = prevY;
-			
+			let auxX = this.tail[i].x;
+			let auxY = this.tail[i].y;
+			// undraws the last tail from the canvas
+			if(this.tail.length - i == 1)
+				this.tail[i].undraw();
+			this.tail[i].x = prevX;
+			this.tail[i].y = prevY;
+			prevX = auxX;
+			prevY = auxY;
 		}
-		
 	}
 
 	undraw()
@@ -128,7 +126,7 @@ class Snake
 		let prevX = this.x;
 		let prevY = this.y;
 		if(this.tail.length == 0)
-		this.undraw();
+			this.undraw();
 		this.x += this.dx;
 		this.y += this.dy;
 		this.draw();
@@ -142,6 +140,7 @@ class Snake
 			return true;
 			if((dy + this.dy) == 0 && dy != this.dy)
 			return true;
+		
 		
 		return false;
 	}
@@ -158,8 +157,6 @@ class Snake
 
 	headToTail(food)
 	{
-		let newTail = new Tail(this.x, this.y);
-		newTail.draw();
 		this.tail.push(new Tail(this.x, this.y));
 		this.x = food.x;
 		this.y = food.y;
