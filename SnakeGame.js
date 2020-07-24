@@ -38,18 +38,18 @@ class Snake
 		if(this.tail.length == 0)
 			return;
 		
-		let prevX = this.tail[0].x;
-		let prevY = this.tail[0].y;
+		let prevX = this.tail[this.tail.length - 1].x;
+		let prevY = this.tail[this.tail.length - 1].y;
 		if(this.tail.length == 1)
 			this.tail[0].undraw();
-		this.tail[0].x = x;
-		this.tail[0].y = y;
-		for(let i = 1; i < this.tail.length; i++)
+		this.tail[this.tail.length - 1].x = x;
+		this.tail[this.tail.length - 1].y = y;
+		for(let i = this.tail.length - 2; i >= 0; i--)
 		{
 			let auxX = this.tail[i].x;
 			let auxY = this.tail[i].y;
 			// undraws the last tail from the canvas
-			if(this.tail.length - i == 1)
+			if(i == 0)
 				this.tail[i].undraw();
 			this.tail[i].x = prevX;
 			this.tail[i].y = prevY;
@@ -119,6 +119,7 @@ class Snake
 	{
 			this.headToTail(engine.food);
 			engine.food.eatFood();
+			console.log(this.tail.length);
 	}
 
 	moveSnake()
@@ -190,7 +191,6 @@ class Tail
 
 	draw()
 	{
-		// Set the fill style to blue
 		ctx.fillStyle = "#ffc0cb";
 
 		ctx.fillRect(this.x, this.y, SIZE, SIZE);
