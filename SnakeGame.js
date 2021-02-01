@@ -1,9 +1,12 @@
 
-var engine, snake, ctx;
+let engine, snake, ctx;
 
 const WIDTH = 60;
 const HEIGHT = 60;
 const SIZE = 10;
+
+const SNAKE_COLOUR = "#ffc0cb";
+const FOOD_COLOUR = "#aa0000";
 
 class Snake
 {
@@ -25,8 +28,8 @@ class Snake
 
 	draw()
 	{
-		// Set the fill style to blue
-		ctx.fillStyle = "#ffc0cb";
+
+		ctx.fillStyle = SNAKE_COLOUR;
 
 		ctx.fillRect(this.x, this.y, SIZE, SIZE);
 	}
@@ -148,9 +151,9 @@ class Snake
 
 	outOfBounds()
 	{
-		if(this.x < 0 || this.x >= WIDTH * SIZE)
+		if(this.x < 0 || this.x > (WIDTH * SIZE) -(SIZE))
 			return true;
-		else if(this.y < 0 || this.y >= HEIGHT * SIZE)
+		else if(this.y < 0 || this.y > (HEIGHT * SIZE) -(SIZE))
 			return true;
 
 		return false;
@@ -238,7 +241,7 @@ class Food
 	draw()
 	{
 		// Set the fill style to red
-		ctx.fillStyle = "#666666";
+		ctx.fillStyle = FOOD_COLOUR;
 
 		ctx.fillRect(this.x, this.y, SIZE, SIZE);
 
@@ -290,7 +293,7 @@ class Engine
     
     animation()
     {
-		engine.collectedFood()
+		engine.collectedFood();
 		snake.move(engine.getKey());
 	}
 	
@@ -325,6 +328,8 @@ class Engine
 
 	gameLost()
 	{
+		ctx.clearRect(0,0, 600, 600);
+		this.food = this.newFood();
 		snake = new Snake(10 * SIZE, 30 * SIZE);
 	}
     
