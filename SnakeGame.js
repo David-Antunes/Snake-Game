@@ -329,6 +329,7 @@ class Engine
 	gameLost()
 	{
 		ctx.clearRect(0,0, 600, 600);
+		this.foodCounter = 0;
 		this.food = this.newFood();
 		snake = new Snake(10 * SIZE, 30 * SIZE);
 	}
